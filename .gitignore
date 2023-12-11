@@ -1,0 +1,5 @@
+/contact-api
+/contact-app
+/node_modules
+.env
+*.swp

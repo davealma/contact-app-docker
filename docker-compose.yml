@@ -1,0 +1,54 @@
+
+version: '3'
+
+services:
+  web:
+    container_name: contact_app
+    build:
+      context: ./contact-app
+    depends_on:
+      - node
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./contact-app:/src
+      - /src/node_modules
+    environment:
+      - PORT=4200
+    networks:
+      - webnet
+  node: 
+    container_name: contact_api
+    build: 
+      context: ./contact-api
+    ports:
+      - "3000:3000"
+    volumes: 
+      - ./contact-api:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DATABASE_URL=postgres://postgres:s3cr3t@database:5432/wt_contact
+      - API_URL=http://localhost:3000/api
+      - AWS_ACCESS_KEY=${BUCKET_KEY}
+      - AWS_SECRET_KEY=${BUCKET_SECRET}
+      - AWS_REGION=${BUCKET_REGION}
+      - AWS_BUCKET_NAME=${BUCKET_NAME}
+    depends_on:
+      - database
+    networks: 
+    - webnet
+  database:
+    container_name: contact_db
+    image: postgres:16.1
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=s3cr3t
+      - POSTGRES_DB=wt_contact
+    networks:
+      - webnet
+networks:
+  webnet:
